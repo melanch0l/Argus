@@ -7,7 +7,7 @@
 ## Start here
 
 - [Canonical project specification](docs/PROJECT_SPECIFICATION.md)
-- [Agent development rules](AGENTS.md)
+
 - [Roadmap, Phase 1 acceptance checklist and unresolved decisions](docs/implementation/roadmap.md)
 - [Phase 1 documentation record](docs/experiments/phase-01-record.md)
 
@@ -38,18 +38,9 @@ Ubuntu 24.04 LTS, actual kernel feature probes, eBPF C and Clang/LLVM, Cilium eB
 
 The system is passive: it observes selected operations and generates contextual alerts; it does not block operations or terminate workloads. Unresolved identity is never guessed or classified as host by default.
 
-## Sequential work prompts
+## Development roadmap
 
-1. [Requirements](prompts/01-requirements.md)
-2. [Environment and foundation](prompts/02-foundation.md)
-3. [Kernel monitoring](prompts/03-ebpf-monitoring.md)
-4. [Go agent](prompts/04-go-agent.md)
-5. [Container identity](prompts/05-container-identity.md)
-6. [Detection](prompts/06-detection.md)
-7. [Storage and API](prompts/07-backend.md)
-8. [Dashboard](prompts/08-dashboard.md)
-9. [Evaluation](prompts/09-evaluation.md)
-10. [Thesis](prompts/10-thesis.md)
+Implementation will proceed through environment verification, kernel monitoring, the Go agent, container identity resolution, behavioral detection, storage and REST APIs, the dashboard, experimental evaluation and thesis reporting. Deliverables and acceptance evidence for each stage are defined in the [implementation roadmap](docs/implementation/roadmap.md).
 
-Prompts are instructions for later approved work, not evidence those phases ran. Do not execute the next phase without explicit approval. No source tree, Go module, build tool, dependency lockfile or deployment configuration is created in Phase 1.
+Phase 1 contains design documentation only. Subsequent phases require explicit approval. No source tree, Go module, build tool, dependency lockfile or deployment configuration has been created.
 # Thesis
