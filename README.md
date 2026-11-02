@@ -43,4 +43,4 @@ The system is passive: it observes selected operations and generates contextual 
 Implementation will proceed through environment verification, kernel monitoring, the Go agent, container identity resolution, behavioral detection, storage and REST APIs, the dashboard, experimental evaluation and thesis reporting. Deliverables and acceptance evidence for each stage are defined in the [implementation roadmap](docs/implementation/roadmap.md).
 
 Phase 1 contains design documentation only. Subsequent phases require explicit approval. No source tree, Go module, build tool, dependency lockfile or deployment configuration has been created.
-# Thesis
+
