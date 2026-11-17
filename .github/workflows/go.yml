@@ -1,0 +1,80 @@
+name: Go portable foundation
+
+on:
+  push:
+    paths:
+      - '**/*.go'
+      - 'go.mod'
+      - 'go.sum'
+      - '.go-version'
+      - 'configs/**'
+      - 'scripts/**'
+      - 'Makefile'
+      - '.github/workflows/go.yml'
+  pull_request:
+    paths:
+      - '**/*.go'
+      - 'go.mod'
+      - 'go.sum'
+      - '.go-version'
+      - 'configs/**'
+      - 'scripts/**'
+      - 'Makefile'
+      - '.github/workflows/go.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .go-version
+          cache: false
+      - name: Download and verify modules
+        run: |
+          go mod download
+          go mod verify
+          go mod tidy -diff
+          go tool bpf2go -help
+      - name: Require gofmt
+        shell: bash
+        run: |
+          files=$(gofmt -l cmd internal)
+          if [ -n "$files" ]; then
+            printf 'Run gofmt on:\n%s\n' "$files"
+            exit 1
+          fi
+      - name: Portable tests
+        run: go test ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Race tests
+        env:
+          CGO_ENABLED: '1'
+        run: go test -race ./...
+      - name: Build portable commands
+        run: go build ./cmd/agent ./cmd/backend ./cmd/envcheck
+      - name: Check example configuration settings only
+        run: |
+          go run ./cmd/agent --check-config --config configs/agent.example.json
+          go run ./cmd/backend --check-config --config configs/backend.example.json
+      - name: Cross-build Linux amd64 commands (no kernel execution)
+        env:
+          CGO_ENABLED: '0'
+          GOOS: linux
+          GOARCH: amd64
+        run: go build ./cmd/agent ./cmd/backend ./cmd/envcheck
+      - name: Cross-build Linux arm64 commands (no kernel execution)
+        env:
+          CGO_ENABLED: '0'
+          GOOS: linux
+          GOARCH: arm64
+        run: go build ./cmd/agent ./cmd/backend ./cmd/envcheck

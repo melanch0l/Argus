@@ -2,7 +2,7 @@
 
 ## 1. Status, purpose and traceability
 
-**Phase 1 protocol; no experiments have been executed and no numerical result or compatibility claim is made.** [The project specification](../PROJECT_SPECIFICATION.md) is authoritative. The [objectives](../research/objectives.md), [questions](../research/questions.md) and [scope](../research/scope.md) distinguish the execution MVP from the full process/file/network/privilege thesis. This plan authorizes no implementation or Phase 2 work.
+**Research protocol; no monitoring/detection/performance experiments have been executed and no numerical research result or kernel compatibility claim is made.** Updated for the authorized PostgreSQL design in canonical revision 2. [The project specification](../PROJECT_SPECIFICATION.md) is authoritative. The [objectives](../research/objectives.md), [questions](../research/questions.md) and [scope](../research/scope.md) distinguish the execution MVP from the full process/file/network/privilege thesis. Phase 2 portable foundation is explicitly approved; this evaluation protocol itself authorizes no later implementation. Portable software tests are recorded separately from research trials.
 
 | Study | Questions/objectives | Canonical requirements | Primary evidence |
 |---|---|---|---|
@@ -19,7 +19,7 @@ NFR-01–NFR-10 additionally require architecture review, graceful shutdown, mal
 Before confirmatory trials, freeze a dated, versioned protocol and retain its identifier with every run. It must contain:
 
 - Host CPU/core count, RAM, storage/filesystem, virtualization, OS, actual kernel/build/architecture, BTF, cgroup mode, Docker version/configuration, privileges and available hook/helper/program-type probes. Record load/attach failures and reasons; kernel version alone is insufficient.
-- Source/build identifiers, tool and dependency versions, event ABI/schema, enabled hooks, filters, rule versions, allowlists, deduplication window, resolver/retry policies, buffer/queue sizes, batch settings, SQLite/WAL/retention configuration and backend placement.
+- Source/build identifiers, tool and dependency versions, event ABI/schema, enabled hooks, filters, rule versions, allowlists, deduplication window, resolver/retry policies, buffer/queue sizes, batch settings, PostgreSQL server/image/driver versions, pool/admission/transaction/lock/retry limits, durability/WAL/checkpoint/autovacuum/retention settings and backend/database placement. Preserve exact event nanoseconds when assessing timestamp projections, and record restore/recovery assumptions.
 - Workload/image identifiers, operation manifests, seeds, concurrency, offered-load levels, trial durations, warm-up, drain limits, scenario labels, alert matching windows, resource sampling interval and clock calibration procedure.
 - Numerical acceptance budgets and their rationale: per-family capture, incorrect/unresolved identity, precision/recall, false-positive units, p95/p99 latency, CPU/memory/workload overhead and stage loss. Record minimum sample sizes and uncertainty requirements. These budgets are **unresolved in Phase 1**, not assumed zero or silently chosen later.
 - Fixed repetition count, randomized condition order/seed, run exclusion rules, handling of zero denominators/missing truth, confidence interval method and planned subgroup comparisons.

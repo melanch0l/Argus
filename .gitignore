@@ -1,3 +1,18 @@
 # Local coding-assistant instructions and workflow prompts
 /AGENTS.md
 /prompts/
+
+# Local build, dependency and private configuration artifacts
+/bin/
+/.tools/
+/.cache/
+/reports/
+.env
+.env.*
+!.env.example
+*.local.json
+*.pem
+*.key
+*.secret
+*.out
+.DS_Store

@@ -1,0 +1,520 @@
+{
+  "schema_version": 1,
+  "runtime_os": "darwin",
+  "runtime_arch": "arm64",
+  "privileged_requested": false,
+  "strict_passed": false,
+  "monitoring_ready": false,
+  "checks": [
+    {
+      "id": "os.linux",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Linux is required for host eBPF inspection"
+    },
+    {
+      "id": "runtime.architecture",
+      "status": "pass",
+      "required_for_strict": true,
+      "summary": "Initial supported runtime architectures: amd64 and arm64",
+      "evidence": "arm64"
+    },
+    {
+      "id": "os.ubuntu_24_04",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Requires inspection on the actual Linux host"
+    },
+    {
+      "id": "kernel.btf",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Requires inspection on the actual Linux host"
+    },
+    {
+      "id": "cgroup.v2_mount",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Requires inspection on the actual Linux host"
+    },
+    {
+      "id": "cgroup.v2_controllers",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Requires inspection on the actual Linux host"
+    },
+    {
+      "id": "security.lockdown",
+      "status": "blocked",
+      "required_for_strict": false,
+      "summary": "Requires inspection on the actual Linux host"
+    },
+    {
+      "id": "security.lsm",
+      "status": "blocked",
+      "required_for_strict": false,
+      "summary": "Requires inspection on the actual Linux host"
+    },
+    {
+      "id": "hook.sched.sched_process_exec",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Tracefs discovery requires Linux"
+    },
+    {
+      "id": "hook.sched.sched_process_fork",
+      "status": "blocked",
+      "required_for_strict": false,
+      "summary": "Tracefs discovery requires Linux"
+    },
+    {
+      "id": "hook.sched.sched_process_exit",
+      "status": "blocked",
+      "required_for_strict": false,
+      "summary": "Tracefs discovery requires Linux"
+    },
+    {
+      "id": "hook.syscalls.sys_enter_openat",
+      "status": "blocked",
+      "required_for_strict": false,
+      "summary": "Tracefs discovery requires Linux"
+    },
+    {
+      "id": "hook.syscalls.sys_enter_connect",
+      "status": "blocked",
+      "required_for_strict": false,
+      "summary": "Tracefs discovery requires Linux"
+    },
+    {
+      "id": "hook.syscalls.sys_enter_setuid",
+      "status": "blocked",
+      "required_for_strict": false,
+      "summary": "Tracefs discovery requires Linux"
+    },
+    {
+      "id": "kernel.release",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Recorded command version/identity"
+    },
+    {
+      "id": "kernel.architecture",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Recorded command version/identity"
+    },
+    {
+      "id": "tool.clang",
+      "status": "pass",
+      "required_for_strict": true,
+      "summary": "Recorded command version/identity"
+    },
+    {
+      "id": "tool.llvm",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Recorded command version/identity"
+    },
+    {
+      "id": "tool.llc",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Recorded command version/identity"
+    },
+    {
+      "id": "llvm.bpf_target",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "llc registered targets must explicitly include a BPF target"
+    },
+    {
+      "id": "tool.go",
+      "status": "pass",
+      "required_for_strict": true,
+      "summary": "Require Go 1.25+"
+    },
+    {
+      "id": "tool.node",
+      "status": "pass",
+      "required_for_strict": true,
+      "summary": "Require stable Node \u003e=22.18.0 \u003c23, matching web/package.json"
+    },
+    {
+      "id": "tool.npm",
+      "status": "pass",
+      "required_for_strict": true,
+      "summary": "Require stable npm \u003e=10.9.3 \u003c11, matching web/package.json"
+    },
+    {
+      "id": "tool.pg_config",
+      "status": "pass",
+      "required_for_strict": false,
+      "summary": "Recorded command version/identity"
+    },
+    {
+      "id": "tool.psql",
+      "status": "pass",
+      "required_for_strict": false,
+      "summary": "Recorded command version/identity"
+    },
+    {
+      "id": "tool.bpftool",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Recorded command version/identity"
+    },
+    {
+      "id": "docker.local_endpoint",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Require selected context's standard rootful local Unix endpoint and verified absence of DOCKER_HOST/DOCKER_CONTEXT overrides; raw endpoint omitted",
+      "evidence": {
+        "environment_checked": true,
+        "host_override_present": false,
+        "context_override_present": false,
+        "standard_socket_reported": false
+      }
+    },
+    {
+      "id": "docker.version",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Selected Docker client/server versions and API versions only",
+      "evidence": {
+        "ClientVersion": "",
+        "ClientAPIVersion": "",
+        "ServerVersion": "",
+        "ServerAPIVersion": ""
+      }
+    },
+    {
+      "id": "docker.info",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Selected daemon information; daemon may not be this host",
+      "evidence": {
+        "server_version": "",
+        "os": "",
+        "architecture": "",
+        "kernel": "",
+        "cgroup_driver": "",
+        "cgroup_version": ""
+      }
+    },
+    {
+      "id": "docker.rootful",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Require Linux daemon and security-option evidence without rootless mode; empty options are unknown",
+      "evidence": {
+        "rootless_reported": false
+      }
+    },
+    {
+      "id": "docker.cgroup_v2",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Require daemon cgroup v2 and recognized cgroup driver"
+    },
+    {
+      "id": "docker.host_consistency",
+      "status": "blocked",
+      "required_for_strict": true,
+      "summary": "Require local endpoint and daemon kernel/architecture matching Linux uname and Go runtime; consistency is not cryptographic identity",
+      "evidence": {
+        "kernel_matches": false,
+        "architecture_matches": false
+      }
+    },
+    {
+      "id": "bpf.feature_probe",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Not requested; use --privileged to explicitly authorize transient bpftool kernel capability tests"
+    },
+    {
+      "id": "bpf.program.tracepoint",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require explicit true feature-probe evidence: have_tracepoint_prog_type"
+    },
+    {
+      "id": "bpf.program.cgroup_skb",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require explicit true feature-probe evidence: have_cgroup_skb_prog_type"
+    },
+    {
+      "id": "bpf.map.ringbuf",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require explicit true feature-probe evidence: have_ringbuf_map_type"
+    },
+    {
+      "id": "bpf.helper.tracepoint.bpf_ringbuf_output",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require named helper in this program type's probed helper list"
+    },
+    {
+      "id": "bpf.helper.tracepoint.bpf_ringbuf_reserve",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require named helper in this program type's probed helper list"
+    },
+    {
+      "id": "bpf.helper.tracepoint.bpf_ringbuf_submit",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require named helper in this program type's probed helper list"
+    },
+    {
+      "id": "bpf.helper.tracepoint.bpf_ringbuf_discard",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require named helper in this program type's probed helper list"
+    },
+    {
+      "id": "bpf.helper.cgroup_skb.bpf_ringbuf_output",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require named helper in this program type's probed helper list"
+    },
+    {
+      "id": "bpf.helper.cgroup_skb.bpf_ringbuf_reserve",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require named helper in this program type's probed helper list"
+    },
+    {
+      "id": "bpf.helper.cgroup_skb.bpf_ringbuf_submit",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require named helper in this program type's probed helper list"
+    },
+    {
+      "id": "bpf.helper.cgroup_skb.bpf_ringbuf_discard",
+      "status": "not_tested",
+      "required_for_strict": true,
+      "summary": "Require named helper in this program type's probed helper list"
+    },
+    {
+      "id": "phase3.load_attach",
+      "status": "not_tested",
+      "required_for_strict": false,
+      "summary": "Intended program load/attach and controlled workload tests have not been performed"
+    }
+  ],
+  "commands": [
+    {
+      "name": "uname",
+      "args": [
+        "-r"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": "27.2.0",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    },
+    {
+      "name": "uname",
+      "args": [
+        "-m"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": "arm64",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    },
+    {
+      "name": "clang",
+      "args": [
+        "--version"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    },
+    {
+      "name": "llvm-config",
+      "args": [
+        "--version"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": null,
+      "timed_out": false,
+      "error": "not_found",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": false
+    },
+    {
+      "name": "llc",
+      "args": [
+        "--version"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": null,
+      "timed_out": false,
+      "error": "not_found",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": false
+    },
+    {
+      "name": "go",
+      "args": [
+        "version"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": "go version go1.27.3 darwin/arm64",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    },
+    {
+      "name": "node",
+      "args": [
+        "--version"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": "v22.18.0",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    },
+    {
+      "name": "npm",
+      "args": [
+        "--version"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": "10.9.3",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    },
+    {
+      "name": "pg_config",
+      "args": [
+        "--version"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": "PostgreSQL 17.6",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    },
+    {
+      "name": "psql",
+      "args": [
+        "--version"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": "psql (PostgreSQL) 17.6",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    },
+    {
+      "name": "bpftool",
+      "args": [
+        "version"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": null,
+      "timed_out": false,
+      "error": "not_found",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": false
+    },
+    {
+      "name": "docker",
+      "args": [
+        "context",
+        "inspect",
+        "--format",
+        "{{json .Endpoints.docker.Host}}"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": null,
+      "timed_out": false,
+      "error": "not_found",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    },
+    {
+      "name": "docker",
+      "args": [
+        "version",
+        "--format",
+        "{\"ClientVersion\":{{json .Client.Version}},\"ClientAPIVersion\":{{json .Client.APIVersion}},\"ServerVersion\":{{if .Server}}{{json .Server.Version}}{{else}}null{{end}},\"ServerAPIVersion\":{{if .Server}}{{json .Server.APIVersion}}{{else}}null{{end}}}"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": null,
+      "timed_out": false,
+      "error": "not_found",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    },
+    {
+      "name": "docker",
+      "args": [
+        "info",
+        "--format",
+        "{\"ServerVersion\":{{json .ServerVersion}},\"OSType\":{{json .OSType}},\"Architecture\":{{json .Architecture}},\"KernelVersion\":{{json .KernelVersion}},\"CgroupDriver\":{{json .CgroupDriver}},\"CgroupVersion\":{{json .CgroupVersion}},\"SecurityOptions\":{{json .SecurityOptions}}}"
+      ],
+      "timeout_ms": 5000,
+      "exit_code": null,
+      "timed_out": false,
+      "error": "not_found",
+      "stdout_truncated": false,
+      "stderr_present": false,
+      "stderr_truncated": false,
+      "output_omitted": true
+    }
+  ],
+  "limitations": [
+    "Phase 2 discovery only; intended program load, verifier acceptance, attach and controlled workload validation are not performed until Phase 3.",
+    "Hook filenames do not establish attach permissions or coverage. Kernel version alone does not establish support.",
+    "Strict Docker checks require the standard local Unix socket with no DOCKER_HOST/DOCKER_CONTEXT overrides and matching local kernel/architecture. This is snapshot consistency, not cryptographic host identity; a socket proxy, bind mount or concurrent context change cannot be ruled out.",
+    "No host names, boot IDs, container inventory, DSNs, environment dumps or raw command stderr are collected. Docker and feature-probe raw stdout are omitted. Tool stdout retains only a bounded version/identity line and llc BPF target lines, not installation paths or full diagnostics.",
+    "The optional privileged bpftool feature probe performs transient kernel BPF capability tests; it is not an intended monitoring-program load/attach test."
+  ]
+}

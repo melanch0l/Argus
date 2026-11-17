@@ -2,13 +2,13 @@
 
 ## Status
 
-These are Phase 1 design decisions for **Design and Implementation of an eBPF-Based Container Runtime Security Monitoring System Using Go**, governed by [PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md). “Selected” means selected for design, not implemented, benchmarked or proven compatible. Decisions needing concrete sizes, versions or wire formats remain explicitly deferred to their owners. No Phase 2 work is authorized by this document.
+These are Phase 1 design decisions for **Design and Implementation of an eBPF-Based Container Runtime Security Monitoring System Using Go**, governed by the canonical [PROJECT_SPECIFICATION.md, revision 2](../PROJECT_SPECIFICATION.md). “Selected” means selected for design, not implemented, benchmarked or proven compatible. Decisions needing concrete sizes, versions or wire formats remain explicitly deferred to their owners. Phase 2 portable foundation is explicitly approved (in progress, not accepted); PostgreSQL 17 is the current canonical database choice. Ubuntu target/kernel/access and compatibility evidence remain unknown on the macOS development host; Phase 3 and later phases remain unapproved.
 
-Related documents: [system architecture](system-architecture.md), [component design](component-design.md), [data flow](data-flow.md), [threat model](threat-model.md). The architecture directory was empty when this task began. The API/event-schema/database documents appeared concurrently and were read for contract alignment; links below refer to those Phase 1 designs, not implemented behavior. Research/experiment content remains separately owned. Reading another owner's contract is not a claim of their reciprocal review or approval.
+Related documents: [system architecture](system-architecture.md), [component design](component-design.md), [data flow](data-flow.md), [threat model](threat-model.md). Links below refer to coordinated design contracts and their revision 2 updates, not implemented monitoring behavior. Research/experiment content remains separately owned. Reading another owner's contract is not a claim of their reciprocal review or approval.
 
 ## D01 — Separate host observation from management
 
-**Selected:** a host Go agent owns privileged kernel lifecycle, collection, Docker correlation, local detection, health and delivery. A separate Go backend owns SQLite, rule publication/distribution and REST. React/TypeScript consumes management REST via a frontend service layer. M1–M9 are agent capabilities, M10–M12 management capabilities, and M13 covers health across both applications.
+**Selected:** a host Go agent owns privileged kernel lifecycle, collection, Docker correlation, local detection, health and delivery. A separate Go backend owns PostgreSQL 17, rule publication/distribution and REST. React/TypeScript consumes management REST via a frontend service layer. M1–M9 are agent capabilities, M10–M12 management capabilities, and M13 covers health across both applications.
 
 **Why:** avoid making network-facing management code root-equivalent; keep observation independent of backend availability and make module ownership testable. Separate handlers, business services and repositories.
 
@@ -22,9 +22,9 @@ Related documents: [system architecture](system-architecture.md), [component des
 
 ## D03 — Cilium eBPF, generated ABI and CO-RE where supported
 
-**Selected:** separate eBPF C and Go, use Cilium eBPF and bpf2go with pinned compatible generation/tooling during implementation, and BTF/CO-RE where supported. Validate record ABI version/size/type, bounded strings, byte order and generated layout. Keep raw record ABI separate from the versioned normalized event schema.
+**Selected:** separate eBPF C and Go, use Cilium eBPF v0.22.0 and its matching bpf2go Go tool from the [Go 1.25.0 module](../../go.mod), and BTF/CO-RE where supported. Validate record ABI version/size/type, bounded strings, byte order and generated layout. Keep raw record ABI separate from the versioned normalized event schema.
 
-**Why:** reproducible bindings and explicit compatibility are preferable to handwritten unverified casts. **Alternatives not selected:** arbitrary runtime BPF uploads, undocumented layout parsing, or claiming CO-RE makes all kernels equivalent. **Cost:** actual Linux verifier/layout tests are mandatory. Exact dependency/compiler versions are not chosen or claimed verified in Phase 1; no dependency is added by these docs.
+**Why:** reproducible bindings and explicit compatibility are preferable to handwritten unverified casts. **Alternatives not selected:** arbitrary runtime BPF uploads, undocumented layout parsing, or claiming CO-RE makes all kernels equivalent. **Cost:** actual Linux verifier/layout tests are mandatory. The Go/Cilium/bpf2go pins are present in the foundation; actual BPF compiler support, generated ABI and Ubuntu runtime evidence remain separate checks. A module/tool pin does not prove that the Go suite or Linux probes passed.
 
 ## D04 — Passive, semantically qualified coverage
 
@@ -78,11 +78,19 @@ The guarantee is idempotent persistence for accepted retries, not end-to-end exa
 
 **Why:** a simple outbound client avoids an agent inbound control listener and cross-host rule leakage. **Alternatives not selected:** unauthenticated global rules, arbitrary push commands or “assigned revision” substituted for active revision. **Cost:** update latency depends on polling and failures. ETag/conditional retrieval, immutable manifest digests, full bounded responses and active-lease checks follow the API owner's contract; polling interval is unvalidated configuration, not an achieved propagation bound.
 
-## D12 — Backend-owned SQLite and authorized REST
+## D12 — Backend-owned PostgreSQL and authorized REST
 
-**Selected:** migrations, foreign keys, WAL, one controlled writer path, parameterized SQL, indexed bounded queries, pagination and explicit retention. REST handlers validate/authenticate/authorize, call business services and map responses; repositories alone own SQL. Retain alert/evidence dependencies coherently and coordinate deduplication retention with retry age. Scope every management query/export as well as ingestion.
+**Selected:** PostgreSQL **17**, as defined in canonical revision 2. [Development Compose](../../deploy/compose.yaml) pins `postgres:17.11@sha256:3b0cda93be7c8dba2ed484d19393d93845dc3dafb88973e248ba8e6d99d784e1`. The [deployment record](../../deploy/README.md) documents official tag/index metadata verification on 2026-11-02; Docker is absent and no image was pulled/run. pgx **v5** is the intended Go driver, with exact compatible pin, pool/repository and migration implementation deferred to approved Phase 7; no fake repository or driver dependency in Phase 2.
 
-**Why:** a single-node thesis backend benefits from a simple transactional store without coupling it to the privileged agent. **Alternatives not selected:** shared agent/browser database access, ad-hoc SQL construction or per-record nontransactional batch writes. **Cost:** SQLite is not an unlimited multiwriter/distributed store; disk-full, busy/lock contention, WAL growth, backup and query budgets need measured tests. No measured performance or tamper-proof-history claim is made.
+**Decision history:** Phase 1 selected SQLite; explicit user approval changed that choice to PostgreSQL, now incorporated into canonical revision 2. The previous single-writer/file-database design is not the active persistence contract.
+
+Use migrations, explicit unique/FK constraints, parameterized SQL, bounded connection pool/admission/transactions, indexed keyset queries and retention. Ordinary isolation is `READ COMMITTED` with per-host row locks covering lease/epoch/ingest/inventory/retention transitions; lock the global publication head separately before rule heads. Recheck predicates after locks, handle unique insert races by immutable content comparison, and bound whole-transaction serialization/deadlock retries. REST handlers validate/authenticate/authorize and call services; only repositories own SQL. Retain alert/evidence dependencies and open-epoch receipts; closure tombstones precede receipt cleanup.
+
+Use native `uuid`, uint64 `NUMERIC(20,0)` checked over 0..18446744073709551615 (wire decimal strings unchanged), and UTC `timestamptz(6)` projections plus checked nanosecond remainders for precise occurrence/detection sorting/filtering. Preserve exact event nanoseconds and monotonic numeric values. Canonical RFC 8785 bytes/text and SHA-256 are authoritative; optional JSONB is a separate query projection, not cryptographic canonicalization. Preserve original IDs, boot/epoch and lifecycle facts across replays/migrations.
+
+Require `fsync`, `full_page_writes` and `synchronous_commit` on, separate least-privileged migration/app roles, remote `sslmode=verify-full`, tested `pg_dump`/restore, and explicit WAL/vacuum/disk/pool/query budgets. Physical base backup/WAL archiving/PITR is optional and separately tested. See [database design](database-design.md) for lock order, representations, recovery and provisional limits.
+
+**Why:** user-approved relational backend with concurrent transactions while keeping history outside the privileged agent. **Alternatives not selected:** shared agent/browser database access, immutable-content upserts, ad-hoc SQL or per-record nontransactional batches. **Cost:** a separate database service adds deployment, role/TLS, pool contention, autovacuum/WAL, backup/recovery and capacity management. PostgreSQL is neither unlimited capacity nor tamper-proof evidence; no performance or compatibility is claimed verified.
 
 ## D13 — Least privilege, data minimization and explicit trust limits
 
@@ -119,6 +127,8 @@ This register records the shared documentation baseline. Repository-level review
 
 ## Validation status and phase checkpoint
 
-Phase 1 creates documentation only. Documentation review checks links, diagram blocks and alignment with the API/event/database contracts without implying those designs are implemented or diagrams have rendered. No Go/eBPF/React code, dependency, database migration, API endpoint or benchmark was created. Build, unit, race, integration and Linux privilege checks are not applicable to these documentation edits and have not been claimed passed. See the [roadmap](../implementation/roadmap.md) for acceptance and unresolved decisions.
+**Historical Phase 1 outcome:** documentation only; that phase created no Go/eBPF/React code, dependency, database migration, API endpoint or benchmark. Documentation checks of links, diagram blocks and contract alignment did not establish rendered diagrams or working functionality.
 
-Recommended checkpoint: review the Phase 1 architecture with the API/event-schema and research/experiment owners, capture remaining contract decisions in their approved documents, and obtain explicit approval before Phase 2. Later experiment logs should record actual environment, tool versions, commands, outcomes and deviations, not restate planned requirements as achieved results.
+**Phase 2 progress:** portable source/tooling and a static frontend scaffold now exist. The [frontend record](../../web/README.md#local-validation-record--2026-11-02) reports a successful macOS build/typecheck, five tests and zero audit vulnerabilities on 2026-11-02. The [deployment record](../../deploy/README.md) verifies the development image pin through registry metadata only, with no Docker run. These records do not imply passing Go-suite, privileged Linux, database, API or monitoring tests; record each actual outcome separately. See the [roadmap](../implementation/roadmap.md) for acceptance and unresolved decisions.
+
+Recommended checkpoint: review the Phase 1 architecture with the API/event-schema and research/experiment owners, capture remaining contract decisions in their approved documents, and track the explicitly approved Phase 2 portable foundation to its still-pending acceptance gate. Environment/dependency reports and the Phase 2 experiment record consolidate foundation artifacts and actual command outcomes; report bootstrap is not a prerequisite stopping independent portable work. Distinguish present pins and recorded portable checks from still-pending Go-suite and actual-Ubuntu validation; obtain separate explicit approval before Phase 3. Later experiment logs should record actual environment, tool versions, commands, outcomes and deviations, not restate planned requirements as achieved results.

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "logging": {"level": "info", "format": "json"},
+  "listen": "127.0.0.1:8080",
+  "token_file": "/etc/argus/backend-token",
+  "request_timeout_seconds": 30,
+  "postgresql": {
+    "host": "postgres.example.invalid",
+    "port": 5432,
+    "database": "argus",
+    "user": "argus_app",
+    "password_file": "/etc/argus/postgres-password",
+    "sslmode": "verify-full",
+    "allow_local_insecure": false,
+    "pool_max": 16,
+    "total_connection_budget": 30,
+    "connect_timeout_seconds": 5,
+    "statement_timeout_seconds": 30
+  }
+}

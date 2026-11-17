@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "logging": {"level": "info", "format": "json"},
+  "backend_url": "https://backend.example.invalid/api/v1",
+  "token_file": "/etc/argus/agent-token",
+  "state_dir": "/var/lib/argus/agent",
+  "docker_socket": "/var/run/docker.sock",
+  "request_timeout_seconds": 30
+}

@@ -2,9 +2,9 @@
 
 ## Status, authority and scope
 
-Phase 1 design only. Nothing in this document establishes that programs load, hooks exist, attribution works, APIs are implemented, or performance targets are met. The authority is [PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md); this document elaborates its architecture without replacing it. Target deployment is Ubuntu 24.04 LTS, an actually probed Linux kernel, cgroup v2 and rootful Docker. macOS documentation work is not Linux validation. cgroup v1, rootless Docker and other runtimes require separate assessment.
+Design baseline, updated under explicit user authorization for PostgreSQL and Phase 2 portable foundation. Phase 2 is in progress, not accepted; actual Ubuntu target/kernel/access remain unknown on the macOS development host. Phase 3 and later phases remain unapproved. The canonical source is [PROJECT_SPECIFICATION.md, revision 2](../PROJECT_SPECIFICATION.md). Nothing in this document establishes that programs load, hooks exist, attribution works, APIs are implemented, or performance targets are met. The authority is [PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md); this document elaborates its architecture without replacing it. Target deployment is Ubuntu 24.04 LTS, an actually probed Linux kernel, cgroup v2 and rootful Docker. macOS documentation work is not Linux validation. cgroup v1, rootless Docker and other runtimes require separate assessment.
 
-Companion designs: [components](component-design.md), [data flow](data-flow.md), [threat model](threat-model.md), and [decisions](technical-decisions.md). [Event schema](event-schema.md), [API specification](api-specification.md) and [database design](database-design.md) are separately owned contracts. These architecture documents align with their Phase 1 contracts; their presence is not evidence of implementation.
+Companion designs: [components](component-design.md), [data flow](data-flow.md), [threat model](threat-model.md), and [decisions](technical-decisions.md). [Event schema](event-schema.md), [API specification](api-specification.md) and [database design](database-design.md) are separately owned contracts. These architecture documents align with canonical revision 2; their presence is not evidence of implemented monitoring.
 
 ## Deployment and ownership
 
@@ -23,7 +23,7 @@ flowchart TD
     end
     Sender -->|TLS authenticated batches and heartbeat| API[Separate management backend]
     API -->|Scoped immutable rules| Detection
-    API --> Store[Backend SQLite and migrations]
+    API --> Store[Backend PostgreSQL 17 and migrations]
     Browser[React and TypeScript dashboard] -->|Authenticated management REST| API
     API --> Browser
 ```
@@ -36,9 +36,11 @@ The host agent owns observation and detection. The backend owns durable history,
 | Host Go agent | Feature probes, attach lifecycle, decode, normalize, correlate Docker/cgroups, contextual rules, health, bounded transmission | Persist authoritative management history, kill/block workloads, trust labels as authorization |
 | Management Go backend | Authenticate and scope agents/users; validate and atomically persist batches; inventory, rule revisions, queries, retention | Access Docker/kernel interfaces, silently redetect or rewrite original evidence |
 | React/TypeScript frontend | Actual-data views, filters, rule-management UI, health/coverage indicators | Store agent secrets, call Docker, infer healthy coverage from absence of alerts |
-| SQLite | Backend-owned transactional persistence with schema migrations | Be directly accessed by agents or browsers |
+| PostgreSQL 17 | Backend-owned transactional persistence, bounded pool and schema migrations | Be directly accessed by agents or browsers |
 
-Kernel C and generated Go bindings remain separate from Go lifecycle logic. Proposed package boundaries and M1–M13 responsibilities are in the component design; paths and interfaces are design proposals, not existing source files. Cilium eBPF and bpf2go are the intended loader/binding tools; exact compatible dependencies and Clang/LLVM versions will be pinned only in the approved implementation phase.
+Kernel C and generated Go bindings remain separate from Go lifecycle logic. Proposed package boundaries and M1–M13 responsibilities are in the component design; portable entry points and foundation packages exist, while production interfaces and monitoring remain planned. The [Go module](../../go.mod) declares Go 1.25.0 and Cilium eBPF v0.22.0, with bpf2go as a Go tool from that same module. These pins do not establish a passing Go suite, BPF compilation, loading or target-kernel compatibility; tool/runtime evidence belongs in the Phase 2 reports.
+
+PostgreSQL 17 is the database major baseline. [Development Compose](../../deploy/compose.yaml) pins PostgreSQL 17.11 and its multi-platform index digest; [deployment evidence](../../deploy/README.md) distinguishes metadata verification from the unexecuted Docker/database runtime checks. pgx v5 is intended, but exact pin, pool/repositories, migrations and database integration are Phase 7 work, not Phase 2 fake adapters. Backend storage uses `READ COMMITTED`, per-host row locks, separate global rule-publication locking and explicit unique/FK constraints for concurrent idempotency. Native UUID and checked uint64 numeric projections preserve wire decimal strings; exact nanoseconds survive microsecond wall-time projections. Canonical JSON bytes/text remain separate from JSONB. Durability, bounded WAL/vacuum/disk/pool resources, least-privileged roles, remote verified TLS and tested backup/restore are specified in [database design](database-design.md).
 
 ## Contract baseline shared with the API owner
 
@@ -81,4 +83,4 @@ The [threat model](threat-model.md) documents trust assumptions, abuse cases and
 
 ## Phase 1 review checkpoint
 
-Before implementation approval, review these documents together with the event/API contracts for: atomic batch and ID semantics; evidence retention; inventory/session revisions; scoped rule distribution; actual-kernel probe matrix; queue budgets and loss accounting; and positive/negative attribution and detection test plans. Record unresolved decisions and later experiment evidence in their separately owned records. No code, dependency installation, compatibility result or benchmark is introduced by this design.
+Phase 2 portable foundation is explicitly approved, but acceptance and Ubuntu compatibility remain pending. Before later implementation approval, review these documents together with the event/API contracts for: atomic batch and ID semantics; evidence retention; inventory/session revisions; scoped rule distribution; actual-kernel probe matrix; queue budgets and loss accounting; and positive/negative attribution and detection test plans. Record unresolved decisions and later experiment evidence in their separately owned records. No code, dependency installation, compatibility result or benchmark is introduced by this design.

@@ -1,18 +1,18 @@
-# Implementation roadmap and Phase 1 review gate
+# Implementation roadmap and phase acceptance gates
 
-**Status:** Documentation baseline prepared; human acceptance pending. Only Phase 1 documentation is authorized by the current task. The [canonical specification](../PROJECT_SPECIFICATION.md) controls scope; the [evaluation plan](../experiments/evaluation-plan.md) controls planned measurements. None of the implementation acceptance evidence below has been collected.
+**Status:** Phase 1 documentation baseline prepared; human architecture acceptance remains pending. The user **explicitly approved Phase 2 portable foundation**, now **in progress, not accepted**, with PostgreSQL 17 defined in the [canonical specification, revision 2](../PROJECT_SPECIFICATION.md). The [evaluation plan](../experiments/evaluation-plan.md) controls planned measurements. Current development host: macOS; actual Ubuntu target/access/kernel and compatibility evidence remain unknown. Portable foundation artifacts and selected checks are present below; they do not satisfy the pending Ubuntu target gate. **Phase 3 and later phases remain unapproved.**
 
 ## 1. Sequential phases
 
 | Phase | Deliverable | Required exit evidence before next approval |
 |---|---|---|
 | 1 — Requirements and architecture | Research, requirements, scope, contracts, diagrams, threat model and evaluation plan | Documentation checks; reviewer accepts baseline and explicit remaining decisions |
-| 2 — Environment and foundation | Actual Ubuntu feature report, proposed source layout, pinned tools/dependencies, reproducible build/CI/configuration conventions | Actual OS/kernel/architecture, BTF, Docker/rootful/cgroup v2, hook/helper/map/program/permission probes; version manifest; clean build; documented unsupported features |
+| 2 — Environment and foundation (approved; in progress, not accepted) | Bootstrap environment/dependency reports, minimal portable layout/contracts/configuration/build conventions, justified verified foundation pins; Ubuntu capability evidence when target available | Actual OS/kernel/architecture, BTF, Docker/rootful/cgroup v2, hook/helper/map/program/permission probes; version manifest; clean build; documented unsupported features |
 | 3 — Kernel monitoring | Incremental process, file, network and privilege programs with versioned raw records and failure counters | Real controlled workload observations and verifier/load/attach evidence for each supported capability; malformed-record and loss tests; candidate-to-actual hook matrix |
 | 4 — Go agent | Production loading/decoding, bounded pipeline, normalization, health, durable outbox and shutdown | Real kernel events; unit/fuzz/race tests where supported; saturation, restart, disk-full and bounded-drain tests; counters and delivery-uncertainty evidence |
 | 5 — Container identity | Docker events/inspection plus cgroup resolver and lifecycle history | Real Docker host/container controls; short-lived, stale, restart, reconnect, PID/cgroup reuse tests; incorrect and unresolved rates reported separately |
 | 6 — Detection | Validated versioned YAML rule input, immutable revisions, contextual rules, allowlists, evidence and deduplication | Positive/benign cases, absent-field semantics, correlation limits and revision swaps; false-positive evaluation with declared units; no enforcement |
-| 7 — Storage and REST | SQLite migrations/WAL/indexes/retention; authenticated management/ingestion; inventory and rule distribution | Transaction/rollback/retry, retained evidence, authorization, lease/revision, pagination, retention, query plan and API integration tests |
+| 7 — Storage and REST (unapproved) | PostgreSQL 17 migrations/indexes/retention using the reviewed development image pin, pgx v5 exact pin/implementation, bounded pool/transactions; authenticated management/ingestion; inventory and rule distribution | Concurrent transaction/rollback/retry and idempotency races; native UUID/checked uint64 and exact-time round trips/keysets; retained evidence/epochs/lifecycles; role/TLS, durability, pg_dump/restore, WAL/vacuum/disk/pool, query plan and API tests |
 | 8 — Dashboard | React/TypeScript pages and service-layer API integration | Real backend integration, loading/empty/error/stale states, filters, pagination, accessibility and authorization-aware frontend tests |
 | 9 — Integration and evaluation | Reproducible repeated disabled/monitor/detection trials, reports, graphs and limitations | Independent ground truth; frozen protocol/thresholds; raw data, actual commands, uncertainty and repeatability evidence; requirement-to-test outcomes |
 | 10 — Thesis | Six chapters grounded in implemented artifacts and actual results | Consistent citations, reproducible figures, traceability, limitations and clear distinction between original engineering and existing eBPF capabilities |
@@ -50,16 +50,38 @@ Checked means the **document exists and addresses the design criterion**, not re
 | 11 | MVP versus advanced scope | [x] Documented | [Scope and full-thesis requirements](../research/scope.md) |
 | 12 | Kernel compatibility/testing strategy | [x] Documented | §2 above, [technical decisions](../architecture/technical-decisions.md), [evaluation](../experiments/evaluation-plan.md) |
 
-**Documentation coverage: 12/12.** Human architecture acceptance: pending. Mermaid syntax/rendering requires visual review; fenced diagram presence alone is not rendering verification. Phase 2 approval: not granted or inferred from a quoted future prompt/button label.
+**Documentation coverage: 12/12.** Human architecture acceptance: pending. Mermaid syntax/rendering requires visual review; fenced diagram presence alone is not rendering verification. Phase 2 approval: **explicitly granted by the user**, independently of this historical documentation checklist. Approval is not Phase 1 reviewer acceptance, a passed Ubuntu check or Phase 2 exit acceptance.
 
-## 4. Unresolved design and validation decisions
+## 4. Phase 2 acceptance checklist — portable progress, target gate pending
+
+Read the canonical revision 2 specification and existing project rules, architecture and scope first. The [environment report](environment.md), [dependency matrix](dependency-matrix.md) and Phase 2 experiment record are maintained Phase 2 outputs: use their actual command outcomes and distinguish observed, blocked, deferred and untested results. Bootstrap or updates to those records must not block independent portable foundation work. Missing target access blocks dependent tests/acceptance, not all scaffolding. Never substitute a macOS Docker client/VM, Linux cross-build or stub build for actual Ubuntu kernel evidence.
+
+Present artifacts include separate `cmd/agent`, `cmd/backend` and `cmd/envcheck` entry points; portable configuration/CLI/environment helpers; example configuration; formatting/build/CI definitions; a static frontend scaffold and locked toolchain; and PostgreSQL-only development Compose. Their presence is not production collection, REST, persistence or dashboard functionality. Detailed evidence is owned by the environment/dependency reports and Phase 2 experiment record; this checklist summarizes without independently rerunning or pre-approving their checks.
+
+| Criterion | Current status / evidence needed |
+|---|---|
+| Approval and phase scope | Explicit Phase 2 approval recorded; in progress, not accepted. Phase 3 not approved. |
+| Development versus target environment | macOS host known; Ubuntu host/VM/access, architecture, kernel, Docker/cgroup/BTF and effective privileges **unknown/pending target**. |
+| Phase 2 records | Environment/dependency reports and Phase 2 experiment record document foundation work and checks; keep command-level evidence and blockers there, not an assumption that reports must predate bootstrap. |
+| Go/tool foundation | [go.mod](../../go.mod) declares Go language minimum **1.25.0** and project toolchain **1.27.3**, Cilium eBPF **v0.22.0** and matching bpf2go as a Go tool. Pins are present; the portable Go suite and tool help passed as recorded below. C generation, Clang BPF-target support and actual Linux probes remain unverified. |
+| Frontend reproducibility | [Frontend record](../../web/README.md#local-validation-record--2026-11-02): Node **22.18.0**, npm **10.9.3**, exact dependency manifest and npm lock present. On macOS arm64, clean install/build/typecheck and **5 tests passed**; audit reported **0 vulnerabilities** on 2026-11-02. These recorded results are not browser/API/Ubuntu validation or a security certification. |
+| Portable structure and tooling | Separate entry points, portable helpers, config examples, Makefile, format script and CI workflow definitions present. No collector/resolver/detection/REST/dashboard or fake DB repository. File presence is not a passed local suite or executed remote CI run. |
+| PostgreSQL development foundation | [Compose](../../deploy/compose.yaml) pins `postgres:17.11@sha256:3b0cda93be7c8dba2ed484d19393d93845dc3dafb88973e248ba8e6d99d784e1`. [Deployment record](../../deploy/README.md) verifies tag/index metadata only: **no Docker pull/run**, Compose runtime, database authentication, durability or restore test. pgx v5 exact pin, pool/repositories/migrations and DB integration remain Phase 7 work. |
+| Ubuntu feature readiness | Actual OS/kernel/architecture, BTF, cgroup v2/rootful Docker, hook/helper/program/map/permission report **pending target**. Phase 2 inspects capabilities; Phase 3 load/attach observation evidence remains separately gated. |
+| Go validation | **Passed locally:** `make check`, `go test ./...`, `go vet ./...`, `go test -race ./...`, module verification/graph consistency, native builds and pinned bpf2go help. Invalid-flag Usage regression fixed and tested. See the [Phase 2 record](../experiments/phase-02-record.md); no BPF program generation/load was performed. |
+| Linux cross-build | **Passed compile-only:** CGO-disabled Linux amd64 and arm64 builds of all three commands. Not BPF load/attach, Docker integration or Ubuntu runtime evidence. |
+| Exit review | **Not passed**. Record unresolved blockers and actual evidence; request separate Phase 3 approval only after required foundation acceptance. |
+
+## 5. Unresolved design and validation decisions
 
 These are explicit follow-up gates, not permission to guess during coding.
 
 | Decision | Resolve by | Required evidence/decision |
 |---|---|---|
 | Actual Ubuntu host, CPU architecture and kernel support matrix | Phase 2 exit | Reproducible probe report from the deployment host; no Linux inference from macOS |
-| Compatible Go/Cilium/bpf2go/Clang/LLVM/frontend/SQLite versions and driver | Phase 2 exit | Exact pins, tool checks, lockfiles and driver/CGO cross-build rationale |
+| Go/Cilium/bpf2go and frontend pin execution evidence; remaining Clang/LLVM and Linux tools | Phase 2 exit | Go toolchain 1.27.3 (language minimum 1.25.0)/Cilium 0.22.0/matching bpf2go and frontend pins/lock present; frontend local results recorded. Go validation passed locally as recorded; actual BPF compiler/kernel checks and target security patch review remain pending |
+| PostgreSQL runtime compatibility, pgx v5 exact pin and migration tools | Phase 7 implementation | Use the existing metadata-verified PostgreSQL 17.11 tag/index digest; review security re-pins via deployment procedure. Runtime server/client/module, schema and recovery tests remain pending; no DB driver/repository added in Phase 2 |
+| PostgreSQL transaction, capacity and recovery budgets | Phase 7 exit | READ COMMITTED + host/global publication locks and unique/FK tests; bounded retries/pool/admission; durability/roles/remote verify-full; pg_dump/restore and optional PITR separately; WAL/autovacuum/disk/query-plan evidence |
 | Minimal service capabilities and Docker socket access model | Phase 2 exit | Measured load/attach/inspection requirements; explicit root-equivalent Docker risk; service-hardening plan |
 | Exact C ABI sizes/offsets/alignment, byte order, string bounds and hook-specific details schemas | Before each Phase 3 capability | Generated layout assertions, decoder fixtures and verifier/runtime evidence; conceptual record header is not final ABI |
 | Required syscall variants, TCP hooks and fallback coverage | Phase 3 acceptance | Actual-kernel semantics/ground truth including file paths, asynchronous network outcomes and credential changes |
@@ -72,8 +94,8 @@ These are explicit follow-up gates, not permission to guess during coding.
 | API provisional body/rate/lease/response bounds | Phase 7 exit and Phase 9 | Capacity/security tests; limits currently design assumptions, not benchmarked capacities |
 | Trial sizes, workload rates, latency clocks/uncertainty, resource and reliability budgets | Before Phase 9 confirmatory trials | Versioned pre-registration; pilot and confirmatory runs separated |
 
-Future changes must update the canonical baseline and affected contracts together. Keep unresolved support visible rather than lowering success criteria after seeing results.
+Future changes must keep the canonical revision 2 specification, architecture contracts and evidence records consistent, with explicit approval for behavior or scope changes. Keep unresolved support visible rather than lowering success criteria after seeing results.
 
-## 5. Recommended phase checkpoint
+## 6. Recommended phase checkpoint
 
-Review this checklist and open decisions; record acceptance and explicit authorization for Phase 2 separately. Keep a short [phase record](../experiments/phase-01-record.md). A Git checkpoint is recommended only after the user requests one; this task does not initialize Git, create a branch or commit. Subsequent logs must include actual commands, outcomes, artifacts and skipped checks.
+Review these checklists and open decisions; Phase 2 authorization is already explicit, but record portable work, actual Ubuntu evidence and acceptance separately. Request separate approval before Phase 3; do not infer it from ongoing foundation work. Keep a short [phase record](../experiments/phase-01-record.md). A Git checkpoint is recommended only after the user requests one; this task does not initialize Git, create a branch or commit. Subsequent logs must include actual commands, outcomes, artifacts and skipped checks.

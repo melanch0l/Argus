@@ -1,10 +1,12 @@
 # Research and delivery scope
 
-Phase 1 documentation only. This scope refines milestones under [the canonical specification](../PROJECT_SPECIFICATION.md); it neither authorizes implementation nor changes FR priorities. All capabilities below are planned, not verified.
+Research scope from the Phase 1 documentation baseline, aligned with explicit user approval of **Phase 2 portable foundation** (in progress, not accepted) and **PostgreSQL 17**. [The canonical specification, revision 2](../PROJECT_SPECIFICATION.md) defines the current PostgreSQL design. FR priorities are unchanged. Phase 3 and later phases remain unapproved. The monitoring capabilities below remain planned, not verified; portable foundation checks do not establish Ubuntu target/kernel compatibility.
 
 ## Deployment and architectural boundary
 
 Initial evaluation target: Ubuntu 24.04 LTS, the actual probed kernel/architecture, rootful Docker and cgroup v2. A privileged host agent owns eBPF loading, collection, normalization, identity resolution, detection and health. A separate management backend owns persistence, inventory, rule distribution and `/api/v1`; a React/TypeScript dashboard consumes its authenticated API. The browser and API must not expose the Docker socket. Kernel C remains separate from Go userspace; a shared versioned event model preserves identity status and timing uncertainty.
+
+Management persistence uses PostgreSQL 17; the exact PostgreSQL 17.11 development image pin, metadata evidence and unexecuted runtime checks are recorded in the [deployment README](../../deploy/README.md). pgx v5 is intended, with exact pin and database implementation deferred to approved Phase 7. Phase 2 may establish portable types/config/build conventions, not a fake database repository or premature driver dependency. Native UUID, checked uint64 numeric projections, exact event nanoseconds beside microsecond wall-time projections, canonical JSON separate from JSONB, concurrent idempotency/locks/constraints and durable recovery must preserve the same event/evidence/epoch/lifecycle contract; see [database design](../architecture/database-design.md).
 
 ## Milestones
 
@@ -35,4 +37,4 @@ Multi-host orchestration, Kubernetes, cgroup v1, rootless support and cross-kern
 
 ## Acceptance evidence
 
-Maintain a requirement-to-test status with supported, partial, unsupported, failed and not-tested outcomes. Use the [objectives](objectives.md) and [evaluation plan](../experiments/evaluation-plan.md) to distinguish functionality, scientific measurements and operational limitations. Phase 1 delivers these plans only; later phases require explicit approval. A phase checkpoint and experiment log are recommended when authorized, with no implicit commit or branch creation.
+Maintain a requirement-to-test status with supported, partial, unsupported, failed and not-tested outcomes. Use the [objectives](objectives.md) and [evaluation plan](../experiments/evaluation-plan.md) to distinguish functionality, scientific measurements and operational limitations. Phase 1 delivered plans only; Phase 2 portable foundation is explicitly approved, but its exit acceptance remains pending actual evidence. Environment/dependency reports are maintained Phase 2 outputs, recording observed portable results separately from pending target checks; their bootstrap must not block independent portable work. Ubuntu-dependent checks remain pending target, not passes; Phase 3 requires separate explicit approval. A phase checkpoint and experiment log are recommended when authorized, with no implicit commit or branch creation.
